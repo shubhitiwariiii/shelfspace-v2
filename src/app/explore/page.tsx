@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { SearchParams } from "nuqs/server";
+import { ExploreFilters } from "@/components/explore/explore-filters";
 import { ExploreSearch } from "@/components/explore/explore-search";
 import { Results } from "@/components/explore/results";
 import { ResultsSkeleton } from "@/components/explore/results-skeleton";
@@ -12,7 +13,7 @@ export default async function ExplorePage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { q, lat, lng } = await searchParamsCache.parse(searchParams);
+  const params = await searchParamsCache.parse(searchParams);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -27,10 +28,15 @@ export default async function ExplorePage({
         </Suspense>
       </div>
 
+      <div className="mt-6">
+        <Suspense fallback={<div className="h-28" />}>
+          <ExploreFilters />
+        </Suspense>
+      </div>
+
       <div className="mt-8">
-        {/* changing key restarts Suspense, so the skeleton shows on every new search */}
-        <Suspense key={`${q}|${lat}|${lng}`} fallback={<ResultsSkeleton />}>
-          <Results q={q} lat={lat} lng={lng} />
+        <Suspense key={JSON.stringify(params)} fallback={<ResultsSkeleton />}>
+          <Results params={params} />
         </Suspense>
       </div>
     </div>

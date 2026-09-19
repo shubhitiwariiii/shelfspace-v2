@@ -3,17 +3,26 @@ import { MapPin, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { AMENITY_LABELS } from "@/lib/constants";
+import { getOpenStatus } from "@/lib/open-now";
 import type { Library } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
-export function LibraryCard({ library }: { library: Library & { distanceKm?: number } }) {
+type Props = {
+  library: Library & { distanceKm?: number };
+  showStatus?: boolean; // only on dynamic pages, see notes below
+};
+
+export function LibraryCard({ library, showStatus = false }: Props) {
   const { id, name, locality, district, rating, details, distanceKm } = library;
+  const status = showStatus && details ? getOpenStatus(details.timings) : null;
+  const extra = (details?.amenities.length ?? 0) - 3;
 
   return (
     <Link
       href={`/library/${id}`}
       className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Card className="gap-3 p-5 transition group-hover:-translate-y-0.5 group-hover:shadow-md">
+      <Card className="h-full gap-3 p-5 transition group-hover:-translate-y-0.5 group-hover:shadow-md">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-display text-lg font-semibold leading-snug">{name}</h3>
           {rating !== undefined && (
@@ -30,6 +39,22 @@ export function LibraryCard({ library }: { library: Library & { distanceKm?: num
           {distanceKm !== undefined && ` · ${distanceKm.toFixed(1)} km away`}
         </p>
 
+        {status && (
+          <p className="flex items-center gap-2 text-sm">
+            <span
+              className={cn("size-2 rounded-full", status.open ? "bg-emerald-500" : "bg-muted-foreground/50")}
+              aria-hidden
+            />
+            <span
+              className={cn(
+                status.open ? "font-medium text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"
+              )}
+            >
+              {status.label}
+            </span>
+          </p>
+        )}
+
         {details?.pricing && <p className="text-sm font-medium">{details.pricing}</p>}
 
         {details?.amenities && (
@@ -39,6 +64,7 @@ export function LibraryCard({ library }: { library: Library & { distanceKm?: num
                 {AMENITY_LABELS[a]}
               </Badge>
             ))}
+            {extra > 0 && <Badge variant="outline">+{extra} more</Badge>}
           </div>
         )}
       </Card>
