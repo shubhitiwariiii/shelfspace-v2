@@ -2,6 +2,9 @@ import Link from "next/link";
 import { SearchX } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { LibraryCard } from "@/components/library-card";
+import { ResultsLayout } from "@/components/explore/results-layout";
+import { MapViewLazy } from "@/components/map/map-view-lazy";
+import type { MapPoint } from "@/components/map/types";
 import { resolveSort, type SortKey } from "@/lib/constants";
 import { searchLibraries } from "@/lib/data/libraries";
 import type { Amenity } from "@/lib/types";
@@ -57,6 +60,18 @@ export async function Results({ params }: { params: ExploreParams }) {
     );
   }
 
+  // send the map only the fields it needs
+  const points: MapPoint[] = items.map((l) => ({
+    id: l.id,
+    name: l.name,
+    lat: l.lat,
+    lng: l.lng,
+    rating: l.rating,
+    pricing: l.details?.pricing,
+    area: [l.locality, l.district].filter(Boolean).join(", "),
+    distanceKm: l.distanceKm,
+  }));
+
   return (
     <div>
       <p aria-live="polite" className="mb-4 text-sm text-muted-foreground">
@@ -64,11 +79,17 @@ export async function Results({ params }: { params: ExploreParams }) {
         {q && ` matching “${q}”`}
         {hasLocation && " within 50 km"}, {SORT_TEXT[resolveSort(sort, hasLocation)]}
       </p>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((l) => (
-          <LibraryCard key={l.id} library={l} showStatus />
-        ))}
-      </div>
+
+      <ResultsLayout
+        list={
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            {items.map((l) => (
+              <LibraryCard key={l.id} library={l} showStatus />
+            ))}
+          </div>
+        }
+        map={<MapViewLazy points={points} user={hasLocation ? { lat, lng } : null} />}
+      />
     </div>
   );
 }
