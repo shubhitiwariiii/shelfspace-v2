@@ -13,12 +13,16 @@ export async function searchLibraries({ q, lat, lng, radiusKm = 50 }: SearchPara
       [l.name, l.address, l.district, l.locality].some((f) => f?.toLowerCase().includes(term))
     );
   }
+
   if (lat !== undefined && lng !== undefined) {
     results = results
       .map((l) => ({ ...l, distanceKm: haversineKm(lat, lng, l.lat, l.lng) }))
       .filter((l) => l.distanceKm! <= radiusKm)
       .sort((a, b) => a.distanceKm! - b.distanceKm!);
+  } else {
+    results.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
   }
+
   return results;
 }
 
