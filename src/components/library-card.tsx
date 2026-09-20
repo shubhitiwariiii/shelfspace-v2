@@ -1,3 +1,4 @@
+import { CompareButton } from "@/components/compare-button";
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ export function LibraryCard({ library, showStatus = false }: Props) {
         className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Card className="h-full gap-3 p-5 transition group-hover:-translate-y-0.5 group-hover:shadow-md">
-          <div className="flex items-start justify-between gap-3 pr-10">
+          <div className="flex items-start justify-between gap-3 pr-24">
             <h3 className="font-display text-lg font-semibold leading-snug">{name}</h3>
             {rating !== undefined && (
               <span className="flex shrink-0 items-center gap-1 text-sm font-medium">
@@ -74,6 +75,7 @@ export function LibraryCard({ library, showStatus = false }: Props) {
 
       {/* a sibling of the link, not inside it, because a button inside a link is invalid HTML */}
       <SaveButton id={id} label={name} compact className="absolute right-3 top-3" />
+      <CompareButton id={id} label={name} compact className="absolute right-12 top-3" />
     </div>
   );
 }

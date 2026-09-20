@@ -1,4 +1,4 @@
-import type { Day, LibraryDetails } from "@/lib/types";
+import type { Day, DayHours, LibraryDetails } from "@/lib/types";
 
 // Vercel servers run in UTC, but these libraries are in India.
 const TIME_ZONE = "Asia/Kolkata";
@@ -54,3 +54,9 @@ export const isOpenNow = (timings: LibraryDetails["timings"], date = new Date())
 
 
 export const getTodayKey = (date = new Date()): Day => nowInZone(date).day;
+
+export function formatHours(hours: DayHours) {
+  if (!hours) return "Closed";
+  if (hours.open === "00:00" && hours.close === "23:59") return "Open 24 hours";
+  return `${formatTime(hours.open)} – ${formatTime(hours.close)}`;
+}

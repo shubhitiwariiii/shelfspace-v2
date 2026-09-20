@@ -30,3 +30,5 @@ export function resolveSort(sort: SortKey | null | undefined, hasLocation: boole
 }
 
 export const USING_SAMPLE_DATA = true;
+
+export const COMPARE_MAX = 3;
