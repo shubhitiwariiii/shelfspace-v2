@@ -1,5 +1,8 @@
 "use client";
 
+import MarkerClusterGroup from "react-leaflet-cluster";
+import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
+import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
 import { useCallback, useEffect } from "react";
 import Link from "next/link";
 import L from "leaflet";
@@ -71,23 +74,26 @@ export function MapView({ points, user }: { points: MapPoint[]; user: UserPoint 
       />
       <MapController points={points} user={user} />
 
-      {points.map((p) => (
-        <Marker key={p.id} position={[p.lat, p.lng]} icon={pinIcon} title={p.name}>
-          <Popup>
-            <div className="space-y-1">
-              <p className="font-display text-base font-semibold leading-snug">{p.name}</p>
-              <p className="text-xs opacity-70">
-                {p.area}
-                {p.distanceKm !== undefined && ` · ${p.distanceKm.toFixed(1)} km away`}
-              </p>
-              {p.pricing && <p className="text-sm font-medium">{p.pricing}</p>}
-              <Link href={`/library/${p.id}`} className="text-sm font-medium hover:underline">
-                View details →
-              </Link>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+      <MarkerClusterGroup chunkedLoading maxClusterRadius={45} showCoverageOnHover={false}>
+        {points.map((p) => (
+          <Marker key={p.id} position={[p.lat, p.lng]} icon={pinIcon} title={p.name}>
+            <Popup>
+              <div className="space-y-1">
+                <p className="font-display text-base font-semibold leading-snug">{p.name}</p>
+                <p className="text-xs opacity-70">
+                  {p.area}
+                  {p.distanceKm !== undefined && ` · ${p.distanceKm.toFixed(1)} km away`}
+                </p>
+                {p.pricing && <p className="text-sm font-medium">{p.pricing}</p>}
+                <Link href={`/library/${p.id}`} className="text-sm font-medium hover:underline">
+                  View details →
+                </Link>
+              </div>
+            </Popup>
+          </Marker>
+
+        ))}
+      </MarkerClusterGroup>
 
       {user && (
         <CircleMarker

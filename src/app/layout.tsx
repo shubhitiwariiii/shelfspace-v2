@@ -1,5 +1,5 @@
 import { CompareTray } from "@/components/compare-tray";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ThemeProvider } from "@/components/theme-provider"; // keep the path where your file is
@@ -13,6 +13,13 @@ const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 export const metadata: Metadata = {
   title: "ShelfSpace: find libraries and study spaces near you",
   description: "Pricing, timings and amenities that a map pin never tells you.",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf7f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#14171a" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

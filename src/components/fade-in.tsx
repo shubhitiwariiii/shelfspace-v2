@@ -1,27 +1,23 @@
-"use client";
+import { cn } from "@/lib/utils";
 
-import { motion, useReducedMotion } from "motion/react";
-
+// CSS-only reveal: works without JavaScript and doesn't delay the first paint
 export function FadeIn({
   children,
   delay = 0,
   className,
+  mode = "scroll",
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  mode?: "load" | "scroll";
 }) {
-  const reduce = useReducedMotion();
-
   return (
-    <motion.div
-      className={className}
-      initial={reduce ? false : { opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+    <div
+      className={cn(mode === "load" ? "fade-up" : "reveal", className)}
+      style={{ "--delay": `${delay}s` } as React.CSSProperties}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import { HeroPreview } from "@/components/hero-preview";
 import Link from "next/link";
 import { ArrowRight, Bookmark, Clock, IndianRupee, LocateFixed, MapPin, Search, Wifi } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

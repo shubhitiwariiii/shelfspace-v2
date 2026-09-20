@@ -157,3 +157,45 @@
 .leaflet-container img.leaflet-tile {
   mix-blend-mode: plus-lighter;
 }
+
+
+/* Animations: pure CSS, no JavaScript, and off for users who prefer reduced motion */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-up {
+    animation: fade-up 0.6s ease-out both;
+    animation-delay: var(--delay, 0s);
+  }
+  /* scroll-triggered reveal in browsers that support it; elsewhere content is simply visible */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 45%;
+    }
+  }
+}
+
+/* Map clusters in the brand color */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+}
