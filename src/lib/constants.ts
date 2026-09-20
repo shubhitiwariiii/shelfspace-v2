@@ -28,3 +28,5 @@ export function resolveSort(sort: SortKey | null | undefined, hasLocation: boole
   if (sort === "distance" && !hasLocation) return "rating";
   return sort ?? (hasLocation ? "distance" : "rating");
 }
+
+export const USING_SAMPLE_DATA = true;

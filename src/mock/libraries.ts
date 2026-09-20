@@ -49,5 +49,6 @@ export const libraries: Library[] = seeds.map((s, i) => ({
       s.sundayClosed ? null : undefined
     ),
     amenities: s.amenities,
+    lastVerified: `2026-${i % 2 === 0 ? "09" : "08"}-${String(5 + i).padStart(2, "0")}`,
   },
 }));
