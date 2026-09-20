@@ -29,6 +29,9 @@ General directories and maps list every kind of business. For a student looking 
 |---|---|
 | ![Explore](docs/screenshots/explore.png) | ![Detail](docs/screenshots/detail.png) |
 
+| Compare | Light mode |
+|---|---|
+| ![Compare](docs/screenshots/compare.png) | ![Light mode](docs/screenshots/light-mode.png) |
 | Compare | Mobile filters | Dark mode |
 |---|---|---|
 | ![Compare](docs/screenshots/compare.png) | ![Mobile filters](docs/screenshots/mobile-filters.png) | ![Dark mode](docs/screenshots/dark-mode.png) |
@@ -92,4 +95,5 @@ docs/screenshots/        # images used in this README
 - [ ] Idempotent OpenStreetMap ingestion script, with verified data in a separate table
 - [ ] Real login, with saved libraries synced per account
 - [ ] Reviews, an owner-verification flow and an admin panel
+- [ ] Automated tests (Vitest and Playwright)
 - [ ] Automated tests (Vitest and Playwright)
