@@ -1,3 +1,4 @@
+import { CompareTray } from "@/components/compare-tray";
 import type { Metadata } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </main>
               <Footer />
             </div>
+            <CompareTray />
           </NuqsAdapter>
         </ThemeProvider>
       </body>

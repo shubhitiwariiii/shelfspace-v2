@@ -1,3 +1,4 @@
+import { CompareButton } from "@/components/compare-button";
 import type { Metadata } from "next";
 import { BadgeCheck, MapPin, Navigation, Phone, Star } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -89,8 +90,9 @@ export default async function LibraryPage({ params }: Props) {
             )}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <SaveButton id={id} label={name} />
+          <CompareButton id={id} label={name} />
           <ShareButton title={name} text={`${name} in ${district} on ShelfSpace`} />
         </div>
       </header>
