@@ -32,9 +32,9 @@ General directories and maps list every kind of business. For a student looking 
 | Compare | Light mode |
 |---|---|
 | ![Compare](docs/screenshots/compare.png) | ![Light mode](docs/screenshots/light-mode.png) |
-| Compare | Mobile filters | Dark mode |
+| Compare | Dark mode |
 |---|---|---|
-| ![Compare](docs/screenshots/compare.png) | ![Mobile filters](docs/screenshots/mobile-filters.png) | ![Dark mode](docs/screenshots/dark-mode.png) |
+| ![Compare](docs/screenshots/compare.png)  | ![Dark mode](docs/screenshots/dark-mode.png) |
 
 ## Tech stack and why
 
