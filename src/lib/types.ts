@@ -9,6 +9,7 @@ export type LibraryDetails = {
   monthlyPrice?: number;     // number, used for filters
   timings: Record<Day, DayHours>;
   amenities: Amenity[];
+  lastVerified?: string; // ISO date like "2026-09-12"
 };
 
 export type Library = {

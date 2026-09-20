@@ -23,7 +23,7 @@ const toMinutes = (hhmm: string) => {
   return h * 60 + m;
 };
 
-function formatTime(hhmm: string) {
+export function formatTime(hhmm: string) {
   const [h, m] = hhmm.split(":").map(Number);
   const hour12 = h % 12 === 0 ? 12 : h % 12;
   return `${hour12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
@@ -51,3 +51,6 @@ export function getOpenStatus(timings: LibraryDetails["timings"], date = new Dat
 
 export const isOpenNow = (timings: LibraryDetails["timings"], date = new Date()) =>
   getOpenStatus(timings, date).open;
+
+
+export const getTodayKey = (date = new Date()): Day => nowInZone(date).day;
