@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useQueryStates } from "nuqs";
-import { Clock, RotateCcw } from "lucide-react";
+import { Clock, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   AMENITY_KEYS,
   AMENITY_LABELS,
@@ -41,7 +44,8 @@ function Chip({
   );
 }
 
-export function ExploreFilters() {
+// idPrefix keeps element ids unique, because the panel can exist twice (desktop and sheet)
+function FiltersPanel({ idPrefix }: { idPrefix: string }) {
   const [{ lat, lng, maxPrice, amenities, open, sort }, setParams] = useQueryStates(
     searchParamParsers,
     { shallow: false }
@@ -59,11 +63,14 @@ export function ExploreFilters() {
     <section aria-label="Filters" className="space-y-4">
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label htmlFor="max-price" className="mb-1 block text-xs font-medium text-muted-foreground">
+          <label
+            htmlFor={`${idPrefix}-max-price`}
+            className="mb-1 block text-xs font-medium text-muted-foreground"
+          >
             Max price per month
           </label>
           <select
-            id="max-price"
+            id={`${idPrefix}-max-price`}
             className={selectClass}
             value={maxPrice ?? ""}
             onChange={(e) => setParams({ maxPrice: e.target.value ? Number(e.target.value) : null })}
@@ -78,11 +85,11 @@ export function ExploreFilters() {
         </div>
 
         <div>
-          <label htmlFor="sort" className="mb-1 block text-xs font-medium text-muted-foreground">
+          <label htmlFor={`${idPrefix}-sort`} className="mb-1 block text-xs font-medium text-muted-foreground">
             Sort by
           </label>
           <select
-            id="sort"
+            id={`${idPrefix}-sort`}
             className={selectClass}
             value={sort ?? ""}
             onChange={(e) => setParams({ sort: (e.target.value || null) as SortKey | null })}
@@ -121,5 +128,44 @@ export function ExploreFilters() {
         ))}
       </div>
     </section>
+  );
+}
+
+export function ExploreFilters() {
+  const [{ maxPrice, amenities, open }] = useQueryStates(searchParamParsers, { shallow: false });
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const activeCount = (maxPrice ? 1 : 0) + amenities.length + (open ? 1 : 0);
+
+  return (
+    <>
+      <div className="hidden md:block">
+        <FiltersPanel idPrefix="desktop" />
+      </div>
+
+      <div className="md:hidden">
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger className={cn(buttonVariants({ variant: "outline" }), "h-11")}>
+            <SlidersHorizontal className="mr-2 size-4" aria-hidden />
+            Filters
+            {activeCount > 0 && (
+              <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                {activeCount}
+              </span>
+            )}
+          </SheetTrigger>
+          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+            <div className="px-4 pb-6">
+              <FiltersPanel idPrefix="mobile" />
+              <Button className="mt-6 h-11 w-full" onClick={() => setSheetOpen(false)}>
+                Show results
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </>
   );
 }

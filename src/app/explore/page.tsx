@@ -29,7 +29,7 @@ export default async function ExplorePage({
       </div>
 
       <div className="mt-6">
-        <Suspense fallback={<div className="h-28" />}>
+        <Suspense fallback={<div className="h-11 md:h-28"  />}>
           <ExploreFilters />
         </Suspense>
       </div>
