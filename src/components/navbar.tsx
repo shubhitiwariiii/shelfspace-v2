@@ -1,5 +1,6 @@
 "use client";
 
+import { useSavedIds } from "@/lib/saved-store";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -23,6 +24,16 @@ const links = [
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const savedCount = useSavedIds().length;
+  const badge = (href: string) =>
+    href === "/dashboard" && savedCount > 0 ? (
+      <span
+        aria-label={`${savedCount} saved`}
+        className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground"
+      >
+        {savedCount}
+      </span>
+    ) : null;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
@@ -44,6 +55,7 @@ export function Navbar() {
               )}
             >
               {l.label}
+              {badge(l.href)}
             </Link>
           ))}
         </nav>
@@ -77,6 +89,7 @@ export function Navbar() {
                     className="rounded-md px-3 py-3 text-base font-medium hover:bg-accent"
                   >
                     {l.label}
+                    {badge(l.href)}
                   </Link>
                 ))}
                 <Link

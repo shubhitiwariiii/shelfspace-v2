@@ -78,3 +78,9 @@ export async function searchLibraries({
 export async function getLibraryById(id: string) {
   return libraries.find((l) => l.id === id) ?? null;
 }
+
+export async function getLibrariesByIds(ids: string[]) {
+  return ids
+    .map((id) => libraries.find((l) => l.id === id))
+    .filter((l): l is Library => l !== undefined);
+}
