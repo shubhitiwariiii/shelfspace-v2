@@ -17,6 +17,7 @@ import { getLibraryById } from "@/lib/data/libraries";
 import { formatDate } from "@/lib/format";
 import { getOpenStatus } from "@/lib/open-now";
 import { cn } from "@/lib/utils";
+import { SimilarLibraries } from "@/components/library/similar-libraries";
 
 // "Open now" depends on the current time, so this page must render fresh on every request
 export const dynamic = "force-dynamic";
@@ -177,6 +178,9 @@ export default async function LibraryPage({ params }: Props) {
             </div>
           </Card>
         </aside>
+        <div className="mt-10">
+          <SimilarLibraries library={library} />
+        </div>
       </div>
     </div>
   );
