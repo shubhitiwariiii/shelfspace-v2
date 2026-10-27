@@ -178,9 +178,10 @@ export default async function LibraryPage({ params }: Props) {
             </div>
           </Card>
         </aside>
-        <div className="mt-10">
-          <SimilarLibraries library={library} />
-        </div>
+      </div>
+
+      <div className="mt-10">
+        <SimilarLibraries library={library} />
       </div>
     </div>
   );
