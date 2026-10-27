@@ -13,7 +13,7 @@ export const searchParamParsers = {
   q: parseAsString.withDefault(""),
   lat: parseAsFloat,
   lng: parseAsFloat,
-  near: parseAsString, // "1" when arriving from the landing page's "Near me" button
+  near: parseAsString,
   maxPrice: parseAsInteger,
   amenities: parseAsArrayOf(parseAsStringLiteral(AMENITY_KEYS)).withDefault([]),
   open: parseAsBoolean.withDefault(false),

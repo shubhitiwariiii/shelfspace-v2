@@ -23,7 +23,6 @@ export const SORT_LABELS: Record<SortKey, string> = {
   distance: "Nearest",
 };
 
-// "Nearest" needs a location. Without one, fall back to rating.
 export function resolveSort(sort: SortKey | null | undefined, hasLocation: boolean): SortKey {
   if (sort === "distance" && !hasLocation) return "rating";
   return sort ?? (hasLocation ? "distance" : "rating");

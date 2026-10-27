@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"; // keep the path wh
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import "./globals.css";
+import { AIChatWidget } from "@/components/ai-chat-widget";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Footer />
             </div>
             <CompareTray />
+            <AIChatWidget />
           </NuqsAdapter>
         </ThemeProvider>
       </body>

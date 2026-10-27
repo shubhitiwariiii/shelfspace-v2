@@ -20,11 +20,7 @@ export type ExploreParams = {
   sort: SortKey | null;
 };
 
-const SORT_TEXT: Record<SortKey, string> = {
-  rating: "top rated first",
-  price: "cheapest first",
-  distance: "closest first",
-};
+const SORT_TEXT: Record<SortKey, string> = { rating: "top rated first", price: "cheapest first", distance: "closest first" };
 
 export async function Results({ params }: { params: ExploreParams }) {
   const { q, lat, lng, maxPrice, amenities, open, sort } = params;
@@ -60,7 +56,6 @@ export async function Results({ params }: { params: ExploreParams }) {
     );
   }
 
-  // send the map only the fields it needs
   const points: MapPoint[] = items.map((l) => ({
     id: l.id,
     name: l.name,
@@ -76,7 +71,7 @@ export async function Results({ params }: { params: ExploreParams }) {
     <div>
       <p aria-live="polite" className="mb-4 text-sm text-muted-foreground">
         {items.length} {items.length === 1 ? "library" : "libraries"}
-        {q && ` matching “${q}”`}
+        {q && ` matching "${q}"`}
         {hasLocation && " within 50 km"}, {SORT_TEXT[resolveSort(sort, hasLocation)]}
       </p>
 

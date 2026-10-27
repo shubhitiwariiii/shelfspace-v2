@@ -36,12 +36,10 @@ export async function searchLibraries({
     );
   }
 
-  // must have ALL selected amenities
   if (amenities.length > 0) {
     results = results.filter((l) => amenities.every((a) => l.details?.amenities.includes(a)));
   }
 
-  // libraries with no known price are left out when a price filter is on
   if (maxPrice !== undefined) {
     results = results.filter(
       (l) => l.details?.monthlyPrice !== undefined && l.details.monthlyPrice <= maxPrice
@@ -56,7 +54,7 @@ export async function searchLibraries({
   if (lat !== undefined && lng !== undefined) {
     results = results
       .map((l) => ({ ...l, distanceKm: haversineKm(lat, lng, l.lat, l.lng) }))
-      .filter((l) => l.distanceKm <= radiusKm);
+      .filter((l) => l.distanceKm! <= radiusKm);
   }
 
   switch (resolveSort(sort, hasLocation)) {
@@ -83,4 +81,8 @@ export async function getLibrariesByIds(ids: string[]) {
   return ids
     .map((id) => libraries.find((l) => l.id === id))
     .filter((l): l is Library => l !== undefined);
+}
+
+export async function getAllLibraries() {
+  return libraries;
 }
