@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Circle, Loader2 } from "lucide-react";
@@ -12,7 +13,9 @@ import { signupSchema, type SignupValues } from "@/lib/schemas/auth";
 import { cn } from "@/lib/utils";
 
 export function SignupForm() {
+  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -33,8 +36,18 @@ export function SignupForm() {
 
   async function onSubmit(values: SignupValues) {
     setServerError(null);
+    setNotice(null);
     const result = await signUp(values);
-    if (!result.ok) setServerError(result.message);
+    if (!result.ok) {
+      setServerError(result.message);
+      return;
+    }
+    if (result.needsEmailConfirmation) {
+      setNotice("Account created. Check your email and click the confirmation link, then log in.");
+      return;
+    }
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -105,6 +118,12 @@ export function SignupForm() {
           className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {serverError}
+        </p>
+      )}
+
+      {notice && (
+        <p role="status" className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-primary">
+          {notice}
         </p>
       )}
 

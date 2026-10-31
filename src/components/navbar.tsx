@@ -1,19 +1,15 @@
 "use client";
 
-import { useSavedIds } from "@/lib/saved-store";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { BookOpen, Menu } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { BookOpen, LogOut, Menu } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { signOut } from "@/lib/auth";
+import { useSavedIds } from "@/lib/saved-store";
+import { useUser } from "@/lib/use-user";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -23,8 +19,12 @@ const links = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const savedCount = useSavedIds().length;
+  const { user, loading } = useUser();
+  const displayName = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "";
+
   const badge = (href: string) =>
     href === "/dashboard" && savedCount > 0 ? (
       <span
@@ -34,6 +34,13 @@ export function Navbar() {
         {savedCount}
       </span>
     ) : null;
+
+  async function handleSignOut() {
+    await signOut();
+    setOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
@@ -62,12 +69,24 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link
-            href="/login"
-            className={cn(buttonVariants({ size: "sm" }), "hidden md:inline-flex")}
-          >
-            Log in
-          </Link>
+
+          {loading ? (
+            <div className="hidden h-8 w-20 md:block" aria-hidden />
+          ) : user ? (
+            <div className="hidden items-center gap-2 md:flex">
+              <span className="max-w-32 truncate text-sm text-muted-foreground" title={user.email ?? undefined}>
+                {displayName}
+              </span>
+              <Button size="sm" variant="outline" onClick={handleSignOut}>
+                <LogOut className="mr-1.5 size-4" aria-hidden />
+                Log out
+              </Button>
+            </div>
+          ) : (
+            <Link href="/login" className={cn(buttonVariants({ size: "sm" }), "hidden md:inline-flex")}>
+              Log in
+            </Link>
+          )}
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
@@ -92,13 +111,19 @@ export function Navbar() {
                     {badge(l.href)}
                   </Link>
                 ))}
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className={cn(buttonVariants(), "mt-2")}
-                >
-                  Log in
-                </Link>
+                {user ? (
+                  <>
+                    <p className="truncate px-3 pt-3 text-sm text-muted-foreground">{displayName}</p>
+                    <Button variant="outline" className="mt-2" onClick={handleSignOut}>
+                      <LogOut className="mr-2 size-4" aria-hidden />
+                      Log out
+                    </Button>
+                  </>
+                ) : (
+                  <Link href="/login" onClick={() => setOpen(false)} className={cn(buttonVariants(), "mt-2")}>
+                    Log in
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
