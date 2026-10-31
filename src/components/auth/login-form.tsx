@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -11,6 +12,7 @@ import { signIn } from "@/lib/auth";
 import { loginSchema, type LoginValues } from "@/lib/schemas/auth";
 
 export function LoginForm() {
+  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -18,15 +20,19 @@ export function LoginForm() {
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    mode: "onTouched", // validate after the field is left, then live
+    mode: "onTouched",
     defaultValues: { email: "", password: "" },
   });
 
   async function onSubmit(values: LoginValues) {
     setServerError(null);
     const result = await signIn(values);
-    if (!result.ok) setServerError(result.message);
-    // when auth is connected: redirect to /dashboard on success
+    if (!result.ok) {
+      setServerError(result.message);
+      return;
+    }
+    router.push("/dashboard");
+    router.refresh(); // makes server components re-read the new session cookie
   }
 
   return (
