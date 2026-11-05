@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -60,6 +61,11 @@ export function LoginForm() {
           {...register("password")}
         />
       </Field>
+      <div className="-mt-2 text-right">
+        <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+          Forgot password?
+        </Link>
+      </div>
 
       {serverError && (
         <p
