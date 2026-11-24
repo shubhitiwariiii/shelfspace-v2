@@ -22,7 +22,7 @@ export function Footer() {
         </nav>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} ShelfSpace. A student project.
+        © {new Date().getFullYear()} ShelfSpace. A student project. Library locations from OpenStreetMap; fees and timings are added as they are verified.
       </div>
     </footer>
   );
