@@ -16,7 +16,7 @@ function amenitySimilarity(a: Library, b: Library): number {
 function priceSimilarity(a: Library, b: Library): number {
   const pa = a.details?.monthlyPrice;
   const pb = b.details?.monthlyPrice;
-  if (pa === undefined || pb === undefined) return 0.5; // unknown: stay neutral
+  if (pa === undefined || pb === undefined) return 0; // unknown: stay neutral
   const diff = Math.abs(pa - pb) / Math.max(pa, pb);
   return Math.max(0, 1 - diff * 2);
 }

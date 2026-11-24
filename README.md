@@ -6,92 +6,119 @@ Find libraries and study spaces near you, with the fees, timings and amenities t
 
 ![ShelfSpace landing page](docs/screenshots/landing.png)
 
-> **Status:** the frontend is complete and runs on sample data. The Supabase backend (real data and accounts) is the next phase.
+> **Data status:** library names and locations are real, imported from OpenStreetMap. Fees, timings and amenities are added only after manual verification, so only a few libraries have them so far. Everything else shows "Not verified yet" on purpose, and the app never presents unverified details as fact.
 
 ## Why this exists
 
-General directories and maps list every kind of business. For a student looking for somewhere to study, the details that matter, such as the monthly fee, day-wise timings, silent zones and lockers, are often missing or only available by phone. ShelfSpace is a focused finder for exactly that.
+General maps list every kind of business. A student looking for somewhere to study needs the monthly fee, day-wise timings, silent zones and lockers, and that information is often missing or available only by phone. ShelfSpace is a focused finder for that one decision.
 
 ## Features
 
-- **Search-first exploring** by name, area or city, with the search kept in the URL so links are shareable and the Back button works
-- **Near me:** browser geolocation, distance by the Haversine formula, and a 50 km radius
-- **Filters and sorting:** maximum monthly fee, amenities (must match all selected), an **Open now** filter that uses Indian time, and sort by rating, price or distance
-- **Interactive map** with clustered pins, side by side with the list on desktop and behind a List/Map toggle on mobile
-- **Library detail page:** fee, amenities, day-wise opening hours with today highlighted, a "last verified" date, a mini map and a directions link
-- **Save and compare:** bookmark libraries (kept in the browser for now) and compare up to 3 side by side through a shareable URL
-- **Login, signup and a Saved dashboard:** validated forms (UI only until the backend is connected)
-- **Dark mode, responsive layout, keyboard and screen-reader support,** and custom 404 and error pages
+- **Search and Near me:** search by name, area or city, or use browser geolocation. Distance is computed with the Haversine formula within a 50 km radius.
+- **Filters and sorting:** maximum monthly fee, amenities, an **Open now** filter evaluated in Indian time, and sorting by rating, price or distance. All of it lives in the URL, so searches are shareable and the Back button works.
+- **Interactive map:** clustered pins, side by side with the list on desktop and behind a List/Map toggle on mobile.
+- **Library detail page:** fee, amenities, day-wise hours with today highlighted, a "last verified" date, a mini map and directions.
+- **Accounts:** email and password sign-up, login, logout and password reset, using Supabase Auth with cookie sessions.
+- **Saved libraries per account:** stored in PostgreSQL and protected by Row-Level Security. Guests can save locally, and those saves merge into the account on login.
+- **Compare:** up to 3 libraries side by side, through a shareable link.
+- **Similar libraries:** content-based recommendations (Jaccard similarity on amenities, plus price) on each detail page.
+- **AI assistant:** a chat widget that answers only from the database contents and says "I don't have that information" otherwise.
+- **Accessible and responsive:** dark mode, keyboard support, labelled controls, reduced-motion support, custom 404 and error pages.
 
-## Screenshots
+## Architecture
 
-| Explore with map | Library detail |
-|---|---|
-| ![Explore](docs/screenshots/explore.png) | ![Detail](docs/screenshots/detail.png) |
+```
+OpenStreetMap ──► Overpass API ──► ingestion script ──► Supabase PostgreSQL
+                  (mirror failover)  (idempotent upsert)  ├─ libraries           (auto-fetched facts)
+                                                          ├─ library_details     (manually verified)
+                                                          └─ saved_libraries     (per user, RLS)
+                                                                   │
+Browser ◄── Next.js (App Router, server components) ◄──────────────┘
+   │             ├─ data-access layer (lib/data)
+   │             ├─ session-refresh proxy (Supabase SSR cookies)
+   │             └─ /api/ai-chat ──► Gemini (grounded on database records)
+   └── Supabase Auth (signup, login, password reset via PKCE)
+```
 
-| Compare | Light mode |
-|---|---|
-| ![Compare](docs/screenshots/compare.png) | ![Light mode](docs/screenshots/light-mode.png) |
+### Data model and security
 
+| Table | Purpose | Who can read | Who can write |
+|---|---|---|---|
+| `libraries` | Name, address, coordinates from OpenStreetMap | Everyone | Ingestion script only (service role) |
+| `library_details` | Fee, timings, amenities, last-verified date | Everyone | Manual verification |
+| `saved_libraries` | One row per (user, library) bookmark | Only the owner | Only the owner |
 
-## Tech stack and why
+Auto-fetched facts and manually verified details are kept in separate tables on purpose, so unverified data can never be mistaken for verified data. The owner column defaults to `auth.uid()` in the database, so the app never sends a user id the client could forge.
+
+## Tech stack
 
 | Layer | Choice | Why |
 |---|---|---|
-| Framework | Next.js (App Router) and TypeScript | Server components, file-based routing, and compile-time type safety |
-| Styling and UI | Tailwind CSS and shadcn/ui | Accessible components that live in the repo, so they are fully customizable |
-| URL state | nuqs | Type-safe search params, so filters are shareable and Back works |
-| Forms | React Hook Form and Zod | Uncontrolled inputs for speed, and one schema for rules and types |
-| Maps | Leaflet, react-leaflet, react-leaflet-cluster, OpenStreetMap | Free, with no API key or billing |
-| Hosting | Vercel | Automatic deploys on every push |
+| Framework | Next.js (App Router) and TypeScript | Server rendering, file-based routing, type safety |
+| Database and auth | Supabase (PostgreSQL, Auth, Row-Level Security) | Security is enforced in the database, not only in app code |
+| Styling | Tailwind CSS and shadcn/ui | Accessible components that live in the repo |
+| URL state | nuqs | Type-safe, shareable search state |
+| Forms | React Hook Form and Zod | One schema for validation rules and types |
+| Maps | Leaflet, OpenStreetMap tiles, marker clustering | Free, no API key or billing |
+| AI | Google Gemini, grounded in database records | Free tier; grounding prevents invented libraries |
+| Hosting | Vercel | Automatic deploys from `main` |
 
-## Architecture highlights
+## Engineering decisions
 
-- **Data-access layer** (`src/lib/data`): pages call functions like `searchLibraries()`. Today they read sample data. Connecting Supabase later changes those functions, not the UI.
-- **Server-side filtering:** search, filters and sorting are URL parameters read on the server, so the browser downloads less JavaScript and every view is a shareable link.
-- **Time-zone-safe "Open now":** servers run in UTC, so opening hours are evaluated in `Asia/Kolkata` with `Intl.DateTimeFormat`, including hours that run past midnight.
-- **Honest data:** the UI shows "Not verified yet" when there's no verification date and marks sample listings as sample data. It never claims more than it knows.
-- **Accessibility:** skip link, labelled controls, `aria-pressed` toggles, `aria-live` result counts, a keyboard-focusable scrollable table, and reduced-motion support.
+- **Data-access layer:** pages call `searchLibraries()` and similar functions, never the database directly. I moved from sample data to Supabase by changing those functions only.
+- **Idempotent ingestion with failover:** the OpenStreetMap importer upserts by a stable id, so it is safe to rerun. The public Overpass server often returns 502, so it retries on mirror servers.
+- **Time-zone-safe "Open now":** servers run in UTC, so opening hours are evaluated in `Asia/Kolkata`, including hours that pass midnight.
+- **Honest data:** a library without a verification date says "Not verified yet".
+- **AI used where it fits:** the chat assistant is grounded on database records. Recommendations use plain set-similarity math, because that needs no model.
+- **Optimistic UI:** bookmarking updates the screen instantly and rolls back if the database refuses.
+- **Auth details:** a proxy refreshes sessions, password reset uses PKCE, reset responses don't reveal which emails have accounts, and redirect targets are validated.
 
 ## Performance and accessibility
 
-PageSpeed Insights, mobile, production deployment (20 Sep 2026):
+PageSpeed Insights, mobile, on the production deployment, measured on DD Mon YYYY:
 
 | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|
-| 93 | 96 | 100 | 100 |
-
-Total Blocking Time 20 ms and Cumulative Layout Shift 0.
+| XX | XX | XX | XX |
 
 ## Getting started
 
-Requires Node.js 20 or newer.
+Requires Node.js 20+ and a free [Supabase](https://supabase.com) project.
 
 ```bash
 git clone https://github.com/shubhitiwariiii/shelfspace-v2.git
 cd shelfspace-v2
 npm install
-npm run dev
+cp .env.example .env.local      # then fill in your values
 ```
 
-Open http://localhost:3000. For a production build: `npm run build && npm run start`.
+1. In the Supabase SQL Editor, run `supabase/schema.sql`.
+2. In Supabase **Authentication → URL Configuration**, add `http://localhost:3000/**` to the Redirect URLs.
+3. Import real libraries: `npm run fetch:osm`
+4. Start the app: `npm run dev` and open http://localhost:3000
+
+| Variable | Used for | Keep private? |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | No |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public key, limited by Row-Level Security | No |
+| `SUPABASE_SERVICE_ROLE_KEY` | Ingestion script only. Bypasses security rules | **Yes. Never deploy it** |
+| `GEMINI_API_KEY` | AI assistant | **Yes** |
 
 ## Project structure
 
 ```
-src/
-├── app/                 # routes: explore, library/[id], compare, dashboard, login, signup, api
-├── components/          # UI: cards, filters, map, auth forms (ui/ holds shadcn components)
-├── lib/                 # data layer, search params, open-now logic, schemas, stores
-└── mock/                # sample libraries
-docs/screenshots/        # images used in this README
+src/app/            routes: explore, library/[id], compare, dashboard, login, signup,
+                    forgot-password, reset-password, auth/callback, api
+src/components/     UI components (ui/ holds shadcn components)
+src/lib/            data layer, Supabase clients, auth, search params, open-now logic
+scripts/            OpenStreetMap ingestion script
+supabase/           database schema
 ```
 
-## Roadmap
+## Known limitations and roadmap
 
-- [ ] Supabase: PostgreSQL, Auth and Row Level Security
-- [ ] Idempotent OpenStreetMap ingestion script, with verified data in a separate table
-- [ ] Real login, with saved libraries synced per account
-- [ ] Reviews, an owner-verification flow and an admin panel
-- [ ] Automated tests (Vitest and Playwright)
-- [ ] Automated tests (Vitest and Playwright)
+- Few libraries have verified fees and timings. An owner or admin verification flow is the main next feature.
+- The AI chat route has input caps but no per-user rate limiting.
+- Password-reset emails use Supabase's built-in sender, which is limited. Production would use custom SMTP.
+- No automated tests yet. Next: unit tests for distance and open-now logic, and end-to-end tests for login and saving.
+- Reviews and ratings, and more cities.

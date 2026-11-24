@@ -28,6 +28,6 @@ export function resolveSort(sort: SortKey | null | undefined, hasLocation: boole
   return sort ?? (hasLocation ? "distance" : "rating");
 }
 
-export const USING_SAMPLE_DATA = true;
+export const USING_SAMPLE_DATA = false;
 
 export const COMPARE_MAX = 3;
